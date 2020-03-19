@@ -1,0 +1,89 @@
+package com.user.controller;
+
+import com.user.Enums.ResultEnum;
+import com.user.Enums.RoleEnum;
+import com.user.VO.ResultVO;
+import com.user.constant.CookieConstant;
+import com.user.constant.RedisConstant;
+import com.user.entity.UserInfo;
+import com.user.service.UserService;
+import com.user.utils.CookieUtil;
+import com.user.utils.ResultVOUtil;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+@RestController
+@RequestMapping("/login")
+public class LoginController {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+    /***
+     * 买家登录
+     * @param openid
+     * @param response
+     * @return
+     */
+    @GetMapping("/buyer")
+    public ResultVO buyer(@RequestParam("openid") String openid, HttpServletResponse response){
+        //1.openid和数据库里的数据是否匹配
+        UserInfo byOpenid = userService.findByOpenid(openid);
+        if(byOpenid == null){
+            return ResultVOUtil.error(ResultEnum.LOGIN_FAIL);
+        }
+        //2.判断角色
+        if(byOpenid.getRole() != RoleEnum.BUYER.getCode()){
+            return ResultVOUtil.error(ResultEnum.ROLE_ERROR);
+        }
+        //3.cookie里设置openid=abc
+        CookieUtil.set(response, CookieConstant.OPENID,openid,CookieConstant.expire);
+        return ResultVOUtil.success();
+    }
+
+    /***
+     * 卖家登录
+     * @param openid
+     * @param response
+     * @return
+     */
+    @GetMapping("/seller")
+    public ResultVO seller(@RequestParam("openid") String openid,
+                           HttpServletResponse response,
+                           HttpServletRequest request){
+
+        //判断是否已登录
+        Cookie cookie = CookieUtil.get(request, CookieConstant.TOKEN);
+        if(cookie != null && StringUtils.isEmpty(stringRedisTemplate.opsForValue().get(String.format(CookieConstant.TOKEN,cookie.getValue())))){
+            return ResultVOUtil.success();
+        }
+        //1.openid和数据库里的数据是否匹配
+        UserInfo byOpenid = userService.findByOpenid(openid);
+        if(byOpenid == null){
+            return ResultVOUtil.error(ResultEnum.LOGIN_FAIL);
+        }
+        //2.判断角色
+        if(byOpenid.getRole() != RoleEnum.SELLER.getCode()){
+            return ResultVOUtil.error(ResultEnum.ROLE_ERROR);
+        }
+        //3.redis设置key = UUID,value = xyz
+        String token = UUID.randomUUID().toString();
+        stringRedisTemplate.opsForValue().set(String.format(RedisConstant.TOKEN_TEMPLATE,token),
+                openid,
+                CookieConstant.expire,  //设置过期时间
+                TimeUnit.SECONDS);      //单位为s
+        //4.cookie里设置openid=abc
+        CookieUtil.set(response, CookieConstant.TOKEN,token,CookieConstant.expire);
+        return ResultVOUtil.success();
+    }
+}

@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: user
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: CONFIG
+      profile: dev
+  redis:
+    host: 47.101.197.240
+    port: 6379
+    password: Allure123
+eureka:
+  client:
+    service-url:
+      defaultZone: http://47.101.197.240:8761/eureka
