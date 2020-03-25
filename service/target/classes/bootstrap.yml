@@ -17,4 +17,3 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://47.101.197.240:8761/eureka
-
