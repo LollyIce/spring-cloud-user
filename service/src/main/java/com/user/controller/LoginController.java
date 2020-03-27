@@ -2,11 +2,13 @@ package com.user.controller;
 
 import com.user.Enums.ResultEnum;
 import com.user.Enums.RoleEnum;
+import com.user.SMS.SmsBase;
 import com.user.VO.ResultVO;
 import com.user.constant.CookieConstant;
 import com.user.constant.RedisConstant;
 import com.user.entity.UserInfo;
 import com.user.service.UserService;
+import com.user.utils.CodeUtil;
 import com.user.utils.CookieUtil;
 import com.user.utils.ResultVOUtil;
 import org.apache.commons.lang.StringUtils;
@@ -50,6 +52,38 @@ public class LoginController {
         CookieUtil.set(response, CookieConstant.OPENID,openid,CookieConstant.expire);
         return ResultVOUtil.success();
     }
+
+    /***
+     * 手机登录 发送验证码
+     * @param phoneNums
+     * @return
+     */
+    @GetMapping("/buyerPhoneSMS")
+    public ResultVO buyerPhoneSMS(@RequestParam("phoneNums") String phoneNums){
+        //生成随机六位验证码
+        String code = CodeUtil.getNonce_str();
+        //发送验证码短信
+        SmsBase.mobileQuery(phoneNums,code);
+        //将验证码存入Redis  key:phoneNums value:code
+        stringRedisTemplate.opsForValue().set(phoneNums,code,60,TimeUnit.SECONDS);
+        return ResultVOUtil.success();
+    }
+
+    /***
+     * 手机登录 校验验证码
+     * @param phoneNums
+     * @return
+     */
+    @GetMapping("/buyerPhoneLogin")
+    public ResultVO buyerPhoneLogin(@RequestParam("phoneNums") String phoneNums,
+                                    @RequestParam("code") String code){
+        String redisCode = stringRedisTemplate.opsForValue().get(phoneNums);
+        if(!code.equals(redisCode)){
+            return ResultVOUtil.error(ResultEnum.CODE_ERROR);
+        }
+        return ResultVOUtil.success();
+    }
+
 
     /***
      * 卖家登录
