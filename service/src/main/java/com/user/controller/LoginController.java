@@ -11,7 +11,9 @@ import com.user.service.UserService;
 import com.user.utils.CodeUtil;
 import com.user.utils.CookieUtil;
 import com.user.utils.ResultVOUtil;
+import com.user.utils.UUIDGenerator;
 import org.apache.commons.lang.StringUtils;
+import org.apache.tomcat.jni.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
 
 @RestController
 @RequestMapping("/login")
@@ -76,14 +79,34 @@ public class LoginController {
      */
     @GetMapping("/buyerPhoneLogin")
     public ResultVO buyerPhoneLogin(@RequestParam("phoneNums") String phoneNums,
-                                    @RequestParam("code") String code){
+                                    @RequestParam("code") String code,
+                                    HttpServletResponse response){
         String redisCode = stringRedisTemplate.opsForValue().get(phoneNums);
         if(!code.equals(redisCode)){
             return ResultVOUtil.error(ResultEnum.CODE_ERROR);
         }
+        //登录成功 将用户名 存入redis 并将key存入cookie
+        String uuid = UUIDGenerator.generate();
+        stringRedisTemplate.opsForValue().set(uuid,phoneNums,2,TimeUnit.HOURS);
+        CookieUtil.set(response,CookieConstant.OPENID,uuid,CookieConstant.expire);
         return ResultVOUtil.success();
     }
 
+    /***
+     * 校验是否已登录
+     * @param request
+     * @return
+     */
+    @GetMapping("/checkLogin")
+    public ResultVO checkLogin(HttpServletRequest request){
+        Cookie cookie = CookieUtil.get(request, CookieConstant.OPENID);
+        if(StringUtils.isEmpty(cookie.getValue())){
+            if(StringUtils.isEmpty(stringRedisTemplate.opsForValue().get(cookie.getValue()))){
+                return ResultVOUtil.success();
+            }
+        }
+        return ResultVOUtil.error(ResultEnum.NOT_LOGIN);
+    }
 
     /***
      * 卖家登录
