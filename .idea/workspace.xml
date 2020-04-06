@@ -22,9 +22,9 @@
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
-        <option name="localRepository" value="E:\开发环境\maven\apache-maven-3.6.1\repository" />
-        <option name="mavenHome" value="E:/开发环境/maven/apache-maven-3.6.1" />
-        <option name="userSettingsFile" value="E:\开发环境\maven\apache-maven-3.6.1\conf\settings.xml" />
+        <option name="localRepository" value="D:\环境\apache-maven-3.6.0\repository" />
+        <option name="mavenHome" value="D:/环境/apache-maven-3.6.0" />
+        <option name="userSettingsFile" value="D:\环境\apache-maven-3.6.0\conf\settings.xml" />
       </MavenGeneralSettings>
     </option>
     <option name="importingSettings">
@@ -76,7 +76,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.CodeUtil">
+  <component name="RunManager" selected="Spring Boot.UserApplication">
     <configuration name="CodeUtil" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.user.utils.CodeUtil" />
       <module name="user-service" />
@@ -132,6 +132,7 @@
       <workItem from="1585193882294" duration="546000" />
       <workItem from="1585281723826" duration="9091000" />
       <workItem from="1585532450865" duration="5909000" />
+      <workItem from="1586151122595" duration="7830000" />
     </task>
     <servers />
   </component>
@@ -150,5 +151,17 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-field">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-core/8.5.16/tomcat-embed-core-8.5.16-sources.jar!/javax/servlet/http/Cookie.java</url>
+          <line>87</line>
+          <properties field="secure" class="javax.servlet.http.Cookie" />
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

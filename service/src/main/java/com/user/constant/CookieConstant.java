@@ -6,6 +6,7 @@ public interface CookieConstant {
 
     String OPENID = "openid";
 
+
     /***
      * 过期时间（单位：s）
      */
